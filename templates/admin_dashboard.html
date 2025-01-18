@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <h1>Claimed Squares</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Square Number</th>
+                <th>Email Address</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for square, email in claimed_squares.items() %}
+                <tr>
+                    <td>{{ square }}</td>
+                    <td>{{ email }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/">Back to Grid</a>
+</body>
+</html>

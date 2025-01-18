@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Bowl Squares</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script>
+        function claimSquare(square) {
+            const email = prompt("Enter your email:");
+            if (!email) return;
+
+            fetch('/claim', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `square=${square}&email=${email}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+
+                    // Update square styling on success
+                    const squareElement = document.getElementById(`square-${square}`);
+                    if (squareElement) {
+                        squareElement.classList.add('claimed');
+                        squareElement.onclick = null; // Disable future clicks
+                    }
+                } else if (data.error) {
+                    alert(data.error);
+                }
+            })
+            .catch(err => console.error(err));
+        }
+    </script>
+</head>
+<body>
+    <h1>Super Bowl Squares</h1>
+    <div class="grid-container">
+        {% for row in range(1, 11) %}
+            {% for col in range(10) %}
+                {% set square_number = (row - 1) * 10 + col + 1 %}
+                {% if square_number in claimed %}
+                    <div id="square-{{ square_number }}" class="square claimed">{{ square_number }}</div>
+                {% else %}
+                    <div id="square-{{ square_number }}" class="square" onclick="claimSquare({{ square_number }})">{{ square_number }}</div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    </div>
+</body>
+</html>
