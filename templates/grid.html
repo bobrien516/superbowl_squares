@@ -3,50 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Bowl Squares</title>
-    <link rel="stylesheet" href="/static/styles.css">
-    <script>
-        function claimSquare(square) {
-            const email = prompt("Enter your email:");
-            if (!email) return;
-
-            fetch('/claim', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `square=${square}&email=${email}`
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.message) {
-                    alert(data.message);
-
-                    // Update square styling on success
-                    const squareElement = document.getElementById(`square-${square}`);
-                    if (squareElement) {
-                        squareElement.classList.add('claimed');
-                        squareElement.onclick = null; // Disable future clicks
-                    }
-                } else if (data.error) {
-                    alert(data.error);
-                }
-            })
-            .catch(err => console.error(err));
+    <title>Backpack Pals Annual Superbowl Pool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 0;
         }
-    </script>
+
+        h1 {
+            font-size: 2.5rem;
+            color: #ff4500;
+            text-shadow: 2px 2px #000;
+            margin-top: 20px;
+        }
+
+        .grid-container {
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: repeat(10, 40px);
+            gap: 5px;
+        }
+
+        .square {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #ccc;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 40px;
+            background-color: #f9f9f9;
+            cursor: pointer;
+        }
+
+        .square.claimed {
+            background-color: gray;
+            color: white;
+        }
+    </style>
+    
 </head>
 <body>
-    <h1>Super Bowl Squares</h1>
+    
+    <h1>Backpack Pals Annual Superbowl Pool!</h1>
     <div class="grid-container">
-        {% for row in range(1, 11) %}
-            {% for col in range(10) %}
-                {% set square_number = (row - 1) * 10 + col + 1 %}
-                {% if square_number in claimed %}
-                    <div id="square-{{ square_number }}" class="square claimed">{{ square_number }}</div>
+        {% for square in range(1, 101) %}
+            <div class="square {% if square in claimed %}claimed{% endif %}">
+                {% if square in claimed %}
+                    {{ claimed[square] }}
                 {% else %}
-                    <div id="square-{{ square_number }}" class="square" onclick="claimSquare({{ square_number }})">{{ square_number }}</div>
+                    {{ square }}
                 {% endif %}
-            {% endfor %}
+            </div>
         {% endfor %}
     </div>
+    <script>
+        document.querySelectorAll('.square').forEach(square => {
+            square.addEventListener('click', function () {
+                if (!this.classList.contains('claimed')) {
+                    const email = prompt("Enter your email:");
+                    const initials = prompt("Enter your initials:");
+    
+                    if (email && initials) {
+                        fetch('/claim', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json', // Ensure JSON format is specified
+                        },
+                        body: JSON.stringify({
+                            square: parseInt(this.innerText), // Convert the square number to an integer
+                            email: email,
+                            initials: initials
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.error) {
+                                alert(data.error);
+                            } else {
+                                this.classList.add('claimed');
+                                this.innerText = initials.toUpperCase(); // Display initials
+                            }
+                        });
+                    } else {
+                        alert("Both email and initials are required!");
+                    }
+                }
+            });
+        });
+    </script>
+    
 </body>
 </html>
